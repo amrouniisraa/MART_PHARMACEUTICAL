@@ -20,7 +20,7 @@ MART PHARMACEUTICAL automatise et optimise la gestion des stocks et de la produc
 
 | Couche | Contenu |
 |--------|---------|
-| Matériel | ESP32, lecteurs RFID, tags RFID, balances, capteurs |
+| Matériel | ESP32, lecteur RFID RC522, tags RFID, balances, capteurs |
 | Communication | Wi-Fi, Firebase Realtime Database, JSON, REST API |
 | Base de données | Oracle SQL / PL/SQL |
 | Application web | Oracle APEX, ORDS |
@@ -28,6 +28,24 @@ MART PHARMACEUTICAL automatise et optimise la gestion des stocks et de la produc
 ### Flux des données
 
 Produit → Tag RFID → Lecteur RFID → ESP32 (+ balance) → Wi-Fi → Firebase / ORDS → Oracle SQL → Oracle APEX → Interface web
+
+## Structure du dépôt
+
+- `esp32/mart_pharma.ino` : code de l'ESP32 (lecture RFID, envoi vers Firebase et Oracle APEX)
+- `database/schema.sql` : script de création de la base Oracle
+- `README.md` : présentation du projet
+
+## Câblage ESP32 et RC522
+
+| RC522 | ESP32 |
+|-------|-------|
+| SDA (SS) | GPIO 5 |
+| SCK | GPIO 18 |
+| MOSI | GPIO 23 |
+| MISO | GPIO 19 |
+| RST | GPIO 22 |
+| 3.3V | 3V3 |
+| GND | GND |
 
 ## Technologies
 
@@ -44,9 +62,18 @@ ESP32, RFID, balance électronique, Wi-Fi, Firebase, JSON, REST API, ORDS, Oracl
 
 ## Base de données
 
-Tables principales : USERS, ROLES, PRODUCTS, SUPPLIERS, WAREHOUSES, RAW_MATERIALS, STOCK, STOCK_MOVEMENTS, PRODUCTION_ORDERS, PRODUCTION_DETAILS, RFID_READERS, RFID_SCANS, QUALITY_CONTROL, LOTS.
+Le script de création se trouve dans `database/schema.sql` (Oracle SQL).
 
-La relation entre PRODUCTION_ORDERS et RAW_MATERIALS est de type N:N, gérée par PRODUCTION_DETAILS.
+Tables : FOURNISSEUR, UTILISATEUR, MATIERE_PREMIERE, COMMANDE_FOURNISSEUR, LOT, MOUVEMENT_STOCK, PRODUIT_PHARMACEUTIQUES, PRODUCTION, RFID_SCANS.
+
+La table RFID_SCANS reçoit les scans envoyés par l'ESP32 (device_id, uid, type de carte, date du scan) via un service REST ORDS.
+
+## Installation
+
+1. Créer les tables en exécutant `database/schema.sql` dans Oracle APEX (SQL Workshop).
+2. Créer le service REST ORDS qui insère les scans dans RFID_SCANS.
+3. Dans `esp32/mart_pharma.ino`, remplacer les valeurs factices (Wi-Fi, URL Firebase, URL Oracle APEX) par vos propres identifiants.
+4. Téléverser le code sur l'ESP32 avec Arduino IDE.
 
 ## Feuille de route
 
